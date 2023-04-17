@@ -1,0 +1,82 @@
+<html>
+<head>
+	<title>Two Dice Rolling Example</title>
+    <style>
+        #mutually_exclusive_two {
+            font-size: 1.3em;
+        }
+
+		#mutually_exclusive_two .result-box {
+			display: inline-block;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+			margin-top: 15px;
+			margin-right: 15px;
+			padding: 10px 20px;
+			border-radius: 5px;
+		}
+
+        #mutually_exclusive_two .hide {
+            display: none;
+        }
+
+        #mutually_exclusive_two div.show {
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="mutually_exclusive_two">
+	    <p>Press the button below to roll two dice and see the sum of their sides.</p>
+	    <button onclick="me2rollDice()">Roll Dice</button>
+	    <div id="result" class="hide">
+			<div class="result-box result1"></div>
+			<div class="result-box result2"></div>
+			<p class="result-text"></p>
+		</div>
+	    <p id="missing-outcomes" class="hide"></p>
+	    <p class="hide">
+			Remember that given the outcome (5,2) which represents one die
+			lading on 5 and the other landing on 2, this reduces the overall outcome
+			down to {7} after they are both added together. Therefore the outcomes (5,2) and (4,3) are both equivilent to the outcome {7}
+			and so it is still true that only one outcome occured and hence all outcomes are mutually exclusive.
+		</p>
+    </div>
+
+	<script>
+		// Define the possible outcomes of a die roll
+		var outcomes = [1, 2, 3, 4, 5, 6];
+		var sample_space = [2,3,4,5,6,7,8,9,10,11,12];
+
+		function me2rollDice() {
+
+			// Choose a random outcome from the list of possible outcomes for each die
+			var outcome1 = outcomes[Math.floor(Math.random() * outcomes.length)];
+			var outcome2 = outcomes[Math.floor(Math.random() * outcomes.length)];
+
+			document.querySelector("#mutually_exclusive_two .result1").innerHTML = outcome1;
+			document.querySelector("#mutually_exclusive_two .result2").innerHTML = outcome2;
+
+			// Calculate the sum of the two outcomes
+			var sum = outcome1 + outcome2;
+
+			// Display the result
+			document.querySelector("#mutually_exclusive_two .result-text").innerHTML = "You rolled a " + outcome1 + " and a " + outcome2 + ", the sum of their sides is " + sum + ". At least one outcome occured (exhaustive), and only this outcome could occur at once (mutually exclusive).";
+
+			// Display the list of missing outcomes
+			document.querySelector("#mutually_exclusive_two #missing-outcomes").innerHTML = "Other possible outcomes: " + sample_space.filter((n) => n !== outcome1 + outcome2).map((n) => `{${n}}`).join(", ");
+
+			document.querySelectorAll("#mutually_exclusive_two .hide").forEach((e) => {
+				e.classList.remove("hide");
+				e.classList.add("show");
+			});
+
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+
+<html>
+<head>
+	<title>Monty Hall Problem</title>
+	<style type="text/css">
+
+        #buttons {
+			margin: 10px 0;
+		}
+
+        #about {
+            width: 550px;
+            font-size: 1.3em;
+            margin: 0 0 10px;
+        }
+
+		.box {
+			width: 130px;
+			height: 130px;
+			display: inline-block;
+			margin-right: 20px;
+            padding: 5px;
+			text-align: center;
+			font-size: 24px;
+			cursor: pointer;
+            vertical-align: top;
+            color: #111;
+            background: #efefef;
+		}
+
+		.goat {
+			background-color: #f00;
+		}
+
+        #events {
+            margin: 10px 0;
+            padding: 5px;
+            color: #fff;
+            background: #c9c9c9;
+            height: 100px;
+            overflow-y: scroll;
+            max-width: 800px;
+        }
+
+        #events > div:first-child {
+            color: #111;
+            font-weight: 800;
+        }
+
+
+	</style>
+</head>
+<body>
+
+	<div id="about">
+		Suppose you're on a game show, and you're given the choice of three doors:
+
+		Behind one door is a car; behind the others, goats. You pick a door, say No. 1,
+
+		and the host, who knows what's behind the doors, opens another door, say No. 3,
+
+		which has a goat. He then says to you, "Do you want to pick door No. 2?"
+
+		Is it to your advantage to switch your choice?
+
+        <p>
+            A common but wrong way to think about it is to consider there to be
+            no advantage to switching. After all there are only 2 options right?
+            Sticking and switching should both have a <b>50%</b> of winning given
+            information we have available.
+        </p>
+
+        <p>
+            However if you actually perform this experiment over and over again, you'll
+            find that one strategy is drastically better than the other. I encourage you to try
+            the simulation below to find out what both strategies, sticking and switching ends
+            up converges to.
+        </p>
+
+    </div>
+
+	<div id="doors">
+		<div class="box" id="box0">unopened door 1</div>
+		<div class="box" id="box1">unopened door 2</div>
+		<div class="box" id="box2">unopened door 3</div>
+	</div>
+
+    <p>
+        Should you stick with the door you selected, or switch, to find
+        the door with the car behind it?
+    </p>
+
+	<div id="buttons">
+		<button id="stickButton" onclick="stick()">Stick</button>
+		<button id="switchButton" onclick="switch_door()">Switch</button>
+	</div>
+
+	<div id="stats">
+		<div class="strategy">
+            <label>Sticking wins:</label>
+		    <span id="stick_wins">0</span>
+		</div>
+		<div class="strategy">
+            <label>Switching wins:</label>
+		    <span id="switch_wins">0</span>
+		</div>
+		<div class="totalw">
+            <label>Total times played:</label>
+            <span id=total>0</span>
+        </div>
+	</div>
+
+    <div id="events">
+    </div>
+
+	<script type="text/javascript">
+		// variables to store the game state
+		var doors = [0, 1, 0]; // 0 represents a goat, 1 represents a car
+		var selected_door = 0; // the door initially selected by the player
+		var opened_door = 2; // the door opened by the host
+        var unopened_door = 1;
+
+        function chooseRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // function to initialize the game state
+		function initialize() {
+
+            reset();
+
+			// assign a car to one of the doors at random
+			let car_index = chooseRandomItem([0,1,2]);
+			doors[car_index] = 1;
+
+			// select a door at random the "player" has chosen 
+            let selected_door = chooseRandomItem([0,1,2]);
+
+			// select a door out of the goat doors that the host opens
+            // can't be a car door and can't be the selected door so must be only one left
+            var goat_indexes = [0,1,2].filter((n) => n != car_index && n != selected_door);
+            opened_door = goat_indexes[0];
+
+            // get the index of the door that the player could switch to
+            unopened_door = [0,1,2].filter((n) => n != opened_door && n != selected_door);
+
+			document.getElementById("box" + selected_door).innerHTML = `door ${selected_door + 1} selected by player`;
+
+			document.getElementById("box" + opened_door).classList.add("goat");
+			document.getElementById("box" + opened_door).innerHTML = `door ${opened_door + 1} opened by host, is a 🐐`;
+
+            document.getElementById("stickButton").innerHTML = `Stick with ${selected_door + 1}`;
+            document.getElementById("switchButton").innerHTML = `Switch to the unopened door ${Number(unopened_door) + 1}`;
+
+		}
+
+		// function to reset the game state
+		function reset() {
+            doors = [0,0,0];
+            selected_door = 0;
+            opened_door = 0;
+            document.querySelectorAll(".box").forEach((e,i) => {
+
+                e.classList.remove("goat");
+                e.innerHTML = `unopened door ${i+1}`;
+
+            });
+		}
+
+        function incrCount(strategy) {
+
+            let st = document.getElementById("stick_wins");
+            let sw = document.getElementById("switch_wins");
+
+            let stn = Number(st.innerHTML.split(" ")[0]);
+            let swn = Number(sw.innerHTML.split(" ")[0]);
+
+            let new_total = Number(document.getElementById("total").innerHTML) + 1;
+
+            if (strategy === "stick") {
+
+                st.innerHTML = `${stn + 1} ${Math.round(((stn + 1)/new_total)*100)}%`;
+                sw.innerHTML = `${swn} ${Math.round(((swn)/new_total)*100)}%`;
+
+            } else {
+
+                sw.innerHTML = `${swn + 1} ${Math.round(((swn + 1)/new_total)*100)}%`;
+                st.innerHTML = `${stn} ${Math.round(((stn)/new_total)*100)}%`;
+
+            }
+
+        }
+
+        function incrTotal() {
+            let to = document.getElementById("total");
+            to.innerHTML = Number(to.innerHTML) + 1;
+        }
+
+		// function to simulate the player sticking with their initial choice
+		function stick() {
+
+            let emsg = "";
+
+			if (doors[selected_door] == 1) {
+
+                incrCount("stick");
+
+                emsg = `You win! Good job sticking. Car was in door ${Number(selected_door) + 1}`;
+
+			} else {
+
+                incrCount("switch");
+
+                emsg = `You lose! Should have switched! Car was in door ${Number(unopened_door) + 1}`;
+
+			}
+
+            incrTotal();
+			addEvent(emsg);
+
+            initialize();
+
+		}
+
+		function switch_door() {
+
+            let st = document.getElementById("stick_wins");
+            let sw = document.getElementById("switch_wins");
+            let to = document.getElementById("total");
+            let emsg = "";
+
+			if (doors[selected_door] != 1) {
+
+                incrCount("switch");
+                emsg = `You win! Good job switching. Car was in door ${Number(unopened_door) + 1}`;
+
+
+			} else {
+
+                incrCount("stick");
+				emsg = `You lose! Should have stuck. Car was in door ${Number(selected_door) + 1}`;
+
+			}
+
+            let new_total = Number(to.innerHTML) + 1;
+            to.innerHTML = new_total
+			addEvent(emsg, new_total);
+
+            initialize();
+
+		}
+
+        function addEvent(event_msg, new_total) {
+
+            let _events = document.getElementById("events");
+
+            let event = document.createElement("div");
+
+            event.classList.add("event");
+            event.innerHTML = `Round ${new_total}: ${event_msg}. Resetting game...`;
+
+            _events.prepend(event);
+
+            if (_events.childNodes.length > 50) {
+                _events.removeChild(_events.lastChild);
+            }
+
+        }
+
+        (() => {
+            initialize();
+        })();
+
+    </script>
+
+</body>
+</html>
